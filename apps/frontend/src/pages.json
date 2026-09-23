@@ -1,0 +1,10 @@
+{"pages":[
+ {"path":"pages/login/login","style":{"navigationBarTitleText":"恋爱日记"}},
+ {"path":"pages/space/space","style":{"navigationBarTitleText":"双人空间"}},
+ {"path":"pages/index/index","style":{"navigationBarTitleText":"我们的日记"}},
+ {"path":"pages/edit/edit","style":{"navigationBarTitleText":"写日记"}},
+ {"path":"pages/detail/detail","style":{"navigationBarTitleText":"日记详情"}},
+ {"path":"pages/mine/mine","style":{"navigationBarTitleText":"我们"}}
+],"globalStyle":{"navigationBarTextStyle":"white","navigationBarBackgroundColor":"#c45c6a","backgroundColor":"#fff7f3"},
+"tabBar":{"color":"#8a6a6a","selectedColor":"#c45c6a","list":[{"pagePath":"pages/index/index","text":"日记"},{"pagePath":"pages/edit/edit","text":"写下"},{"pagePath":"pages/mine/mine","text":"我们"}]}}
+

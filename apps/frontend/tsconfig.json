@@ -1,0 +1,2 @@
+{"compilerOptions":{"target":"ESNext","module":"ESNext","moduleResolution":"bundler","strict":true,"types":["@dcloudio/types","vite/client"]},"include":["src/**/*.ts","src/**/*.vue"]}
+
