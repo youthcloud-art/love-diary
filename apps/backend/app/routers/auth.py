@@ -1,14 +1,67 @@
 import httpx
+from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.config import settings
 from app.database import get_db
 from app.deps import current_user
 from app.models import User
-from app.schemas import LoginIn, RegisterIn
+from app.schemas import LoginIn, PhoneBase, PhoneCodeLoginIn, PhonePasswordLoginIn, PhoneRegisterIn, RegisterIn
 from app.security import decode, hash_password, tokens, verify_password
 
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
+verification_codes: dict[str, tuple[str, datetime]] = {}
+
+
+def phone_email(phone: str) -> str:
+    """Map phone accounts onto the existing unique account field for compatibility."""
+    return f"{phone}@phone.love-diary.local"
+
+
+def verify_code(phone: str, code: str) -> None:
+    saved = verification_codes.get(phone)
+    if not saved or saved[0] != code or saved[1] < datetime.now(timezone.utc):
+        raise HTTPException(401, "验证码错误或已过期")
+    verification_codes.pop(phone, None)
+
+
+@router.post("/code")
+def request_phone_code(data: PhoneBase):
+    # Development sender. Connect an SMS provider before production deployment.
+    code = "246810"
+    verification_codes[data.phone] = (code, datetime.now(timezone.utc) + timedelta(minutes=5))
+    payload = {"message": "验证码已发送，请在 5 分钟内使用"}
+    if settings.secret_key.startswith("development-"):
+        payload["dev_code"] = code
+    return payload
+
+
+@router.post("/phone/register")
+def phone_register(data: PhoneRegisterIn, db: Session = Depends(get_db)):
+    verify_code(data.phone, data.code)
+    email = phone_email(data.phone)
+    if db.query(User).filter_by(email=email).first():
+        raise HTTPException(409, "该手机号已注册")
+    user = User(nickname=data.nickname, email=email, password_hash=hash_password(data.password))
+    db.add(user); db.commit(); db.refresh(user)
+    return tokens(user.id)
+
+
+@router.post("/phone/login")
+def phone_password_login(data: PhonePasswordLoginIn, db: Session = Depends(get_db)):
+    user = db.query(User).filter_by(email=phone_email(data.phone)).first()
+    if not user or not user.password_hash or not verify_password(data.password, user.password_hash):
+        raise HTTPException(401, "手机号或密码错误")
+    return tokens(user.id)
+
+
+@router.post("/phone/code-login")
+def phone_code_login(data: PhoneCodeLoginIn, db: Session = Depends(get_db)):
+    verify_code(data.phone, data.code)
+    user = db.query(User).filter_by(email=phone_email(data.phone)).first()
+    if not user:
+        raise HTTPException(404, "该手机号尚未注册")
+    return tokens(user.id)
 
 
 @router.post("/register")
@@ -65,4 +118,3 @@ def refresh(data: dict, db: Session = Depends(get_db)):
 @router.get("/me")
 def me(user: User = Depends(current_user)):
     return {"id": user.id, "nickname": user.nickname, "email": user.email}
-
