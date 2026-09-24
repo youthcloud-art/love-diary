@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     wechat_appid: str = ""
     wechat_secret: str = ""
     public_base_url: str = "http://127.0.0.1:8000"
-    cors_origins: str = "http://localhost:5173"
+    cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
     upload_dir: str = str(BACKEND_DIR / "uploads")
 
     @property
