@@ -19,6 +19,29 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
 
 
+class SocialIdentity(Base):
+    __tablename__ = "social_identities"
+    __table_args__ = (UniqueConstraint("provider", "provider_user_id"),)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
+    provider: Mapped[str] = mapped_column(String(16), index=True)
+    provider_user_id: Mapped[str] = mapped_column(String(128))
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+    user: Mapped[User] = relationship()
+
+
+class OAuthLoginSession(Base):
+    __tablename__ = "oauth_login_sessions"
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    state: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    provider: Mapped[str] = mapped_column(String(16), index=True)
+    status: Mapped[str] = mapped_column(String(16), default="pending")
+    user_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"))
+    message: Mapped[str | None] = mapped_column(String(255))
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
 class Space(Base):
     __tablename__ = "spaces"
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
@@ -73,4 +96,3 @@ class Media(Base):
     thumb_url: Mapped[str | None] = mapped_column(String(512))
     content_type: Mapped[str] = mapped_column(String(64))
     entry: Mapped[Entry | None] = relationship(back_populates="media")
-

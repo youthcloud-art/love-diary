@@ -10,6 +10,10 @@ class Settings(BaseSettings):
     database_url: str = f"sqlite:///{(BACKEND_DIR / 'var' / 'love_diary.db').as_posix()}"
     wechat_appid: str = ""
     wechat_secret: str = ""
+    wechat_web_appid: str = ""
+    wechat_web_secret: str = ""
+    qq_appid: str = ""
+    qq_secret: str = ""
     public_base_url: str = "http://127.0.0.1:8000"
     cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
     upload_dir: str = str(BACKEND_DIR / "uploads")

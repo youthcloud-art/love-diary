@@ -17,3 +17,5 @@ docker compose -f infra/docker/docker-compose.yml up -d
 运行 `scripts/build.ps1` 后，H5 产物位于 `apps/frontend/dist/build/h5/`；微信产物位于 `apps/frontend/dist/build/mp-weixin/`。
 
 正式上线需要 HTTPS、备案域名、微信后台合法域名配置，以及生产 AppID/AppSecret。建议使用 PostgreSQL、对象存储、反向代理、数据库备份和错误监控。
+
+微信与 QQ 的扫码、官方账号授权登录配置见 [微信与 QQ 登录配置](social-login.md)。
